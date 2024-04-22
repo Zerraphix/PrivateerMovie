@@ -1,8 +1,10 @@
 <resources>
-    <string name="app_name">PrivateerMovie</string>
+    <string name="app_name">Privateer Movies</string>
     <string name="privateer_movies">Privateer Movies</string>
     <string name="search">Search</string>
     <string name="watch_later">Watch Later</string>
     <string name="series">Series</string>
     <string name="movies">Movies</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
