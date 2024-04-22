@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PrivateerMovie</string>
+    <string name="privateer_movies">Privateer Movies</string>
+    <string name="search">Search</string>
+    <string name="watch_later">Watch Later</string>
+    <string name="series">Series</string>
+    <string name="movies">Movies</string>
+</resources>
