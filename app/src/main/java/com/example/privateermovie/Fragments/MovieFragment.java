@@ -82,7 +82,6 @@ public class MovieFragment extends Fragment {
         rq = Volley.newRequestQueue(getContext());
     }
 
-
     public OnLoadMoreListener onLoadMoreListener;
 
     // Method to set the listener
@@ -113,9 +112,6 @@ public class MovieFragment extends Fragment {
             }
         });
 
-
-
-
         return view;
     }
 
@@ -133,19 +129,11 @@ public class MovieFragment extends Fragment {
         }
     }
 
-    // Method to update the GridView with new data
-    public void updateGridViewWithNewData() {
-        loadMoviesFromPreferences(); // Reload data from preferences
-    }
-
-
     public void getMovies() {
         page = page + 1;
         String url = "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=" + page + "&sort_by=popularity.desc";
         StringRequest request = new StringRequest(Request.Method.GET, url, response -> {
             String json = response;
-            // Convert JSON to a single MoviesModel object
-            convertToMoviesModel(json);
             // Save the entire JSON response in SharedPreferences
             saveMovies(json);
             loadMoviesFromPreferences();
@@ -166,14 +154,6 @@ public class MovieFragment extends Fragment {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("movies", data);
         editor.apply();
-    }
-
-    void convertToMoviesModel(String json){
-        // Parse the JSON string into a single MoviesModel object
-        MoviesModel moviesModel = new Gson().fromJson(json, MoviesModel.class);
-        // Process the MoviesModel object as needed
-        // For example, you can extract the list of movies from moviesModel.getResults()
-        // and use it to populate your UI
     }
 
 }
