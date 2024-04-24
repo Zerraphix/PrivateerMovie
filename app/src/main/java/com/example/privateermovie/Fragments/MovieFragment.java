@@ -1,6 +1,5 @@
 package com.example.privateermovie.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,17 +12,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.GridView;
-import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.privateermovie.Adapters.MoviesAdapter;
-import com.example.privateermovie.MainActivity;
-import com.example.privateermovie.Models.CurrentPage;
 import com.example.privateermovie.Models.MoviesModel;
 import com.example.privateermovie.OnLoadMoreListener;
 import com.example.privateermovie.R;
+import com.example.privateermovie.Secrets;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,6 +47,8 @@ public class MovieFragment extends Fragment {
     private GridView gridView;
     private ArrayList<MoviesModel.Result> results;
     private MoviesAdapter adapter;
+    public static RequestQueue rq;
+    public int page = 0;
 
     public MovieFragment() {
         // Required empty public constructor
@@ -74,6 +79,7 @@ public class MovieFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        rq = Volley.newRequestQueue(getContext());
     }
 
 
@@ -94,9 +100,6 @@ public class MovieFragment extends Fragment {
         adapter = new MoviesAdapter(getContext(), results);
         gridView.setAdapter(adapter);
 
-        MainActivity mainActivity = new MainActivity();
-        mainActivity.resetPageNumber();
-
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {}
@@ -105,14 +108,12 @@ public class MovieFragment extends Fragment {
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (firstVisibleItem + visibleItemCount >= totalItemCount) {
                     // You've reached the end of the GridView, load more data here
-                    Activity activity = getActivity();
-                    if (activity instanceof  OnLoadMoreListener){
-                        ((OnLoadMoreListener)activity).onLoadMore();
-                        updateGridViewWithNewData();
-                    }
+                    getMovies();
                 }
             }
         });
+
+
 
 
         return view;
@@ -137,9 +138,42 @@ public class MovieFragment extends Fragment {
         loadMoviesFromPreferences(); // Reload data from preferences
     }
 
-    void loadMoreData() {
-        Toast.makeText(getActivity(), "Loading more movies",
-                Toast.LENGTH_LONG).show();
+
+    public void getMovies() {
+        page = page + 1;
+        String url = "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=" + page + "&sort_by=popularity.desc";
+        StringRequest request = new StringRequest(Request.Method.GET, url, response -> {
+            String json = response;
+            // Convert JSON to a single MoviesModel object
+            convertToMoviesModel(json);
+            // Save the entire JSON response in SharedPreferences
+            saveMovies(json);
+            loadMoviesFromPreferences();
+        }, error -> Log.e("Volley", error.toString()))
+        {
+            @Override
+            public Map<String, String> getHeaders(){
+                Map<String, String>  params = new HashMap<>();
+                params.put("Authorization", Secrets.Token);
+                return params;
+            }
+        };
+        rq.add(request);
+    }
+
+    void saveMovies(String data){
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("movies", data);
+        editor.apply();
+    }
+
+    void convertToMoviesModel(String json){
+        // Parse the JSON string into a single MoviesModel object
+        MoviesModel moviesModel = new Gson().fromJson(json, MoviesModel.class);
+        // Process the MoviesModel object as needed
+        // For example, you can extract the list of movies from moviesModel.getResults()
+        // and use it to populate your UI
     }
 
 }

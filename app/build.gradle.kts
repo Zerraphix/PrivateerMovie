@@ -37,8 +37,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
-    implementation(libs.okhttp)
+    // https://mvnrepository.com/artifact/com.android.volley/volley
+    implementation(libs.volley.v121)
     // https://mvnrepository.com/artifact/com.squareup.picasso/picasso
     implementation(libs.picasso)
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
