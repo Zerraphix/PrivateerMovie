@@ -1,5 +1,7 @@
 package com.example.privateermovie;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Movie;
@@ -22,6 +24,7 @@ import com.example.privateermovie.Fragments.MovieFragment;
 import com.example.privateermovie.Fragments.SerieFragment;
 import com.example.privateermovie.Fragments.WatchLaterFragment;
 import com.example.privateermovie.Models.MoviesModel;
+import com.example.privateermovie.Models.CurrentPage;
 import com.google.gson.Gson;
 
 
@@ -35,9 +38,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Call;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnLoadMoreListener {
 
     private ArrayList<MoviesModel> movies;
+    public CurrentPage currentPage = new CurrentPage();
+    public int page = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,11 +68,12 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_search).setOnClickListener(v -> { });
     }
 
-    void getMovies() {
+    public void getMovies() {
         OkHttpClient client = new OkHttpClient();
 
+        page = page + 1;
         Request request = new Request.Builder()
-                .url("https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc")
+                .url("https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=" + page + "&sort_by=popularity.desc")
                 .get()
                 .addHeader("accept", "application/json")
                 .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4Zjg3ZTVjYjhmNDY1ZTk0MjViMDc5ZWJmOWViZGVlOCIsInN1YiI6IjY2MjYwNGUyMjU4ODIzMDE3ZDkyOGUyMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.NPs6rE6gkzc4JubfcCr6ssuvfChImEWJzqVuhA3gc1A")
@@ -143,5 +149,14 @@ public class MainActivity extends AppCompatActivity {
                     dialogInterface.dismiss();
                 })
                 .show();
+    }
+
+    @Override
+    public void onLoadMore() {
+        getMovies();
+    }
+    public void resetPageNumber() {
+        page = 0;
+        Log.d(TAG, "resetPageNumber: " + page);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.privateermovie.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,7 +17,9 @@ import android.widget.Toast;
 
 import com.example.privateermovie.Adapters.MoviesAdapter;
 import com.example.privateermovie.MainActivity;
+import com.example.privateermovie.Models.CurrentPage;
 import com.example.privateermovie.Models.MoviesModel;
+import com.example.privateermovie.OnLoadMoreListener;
 import com.example.privateermovie.R;
 import com.google.gson.Gson;
 
@@ -37,6 +40,10 @@ public class MovieFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private GridView gridView;
+    private ArrayList<MoviesModel.Result> results;
+    private MoviesAdapter adapter;
 
     public MovieFragment() {
         // Required empty public constructor
@@ -69,26 +76,26 @@ public class MovieFragment extends Fragment {
         }
     }
 
+
+    public OnLoadMoreListener onLoadMoreListener;
+
+    // Method to set the listener
+    public void setOnLoadMoreListener(OnLoadMoreListener listener) {
+        this.onLoadMoreListener = listener;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_movie, container, false);
 
-        // Retrieve data from preferences
-        SharedPreferences preferences = this.getActivity().getPreferences(Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = preferences.getString("movies", ""); // Replace "moviesModel" with the key used to store the data in preferences
-        MoviesModel moviesModel = gson.fromJson(json, MoviesModel.class);
-        Log.v("json data", json);
+        gridView = view.findViewById(R.id.movie_list);
+        results = new ArrayList<>();
+        adapter = new MoviesAdapter(getContext(), results);
+        gridView.setAdapter(adapter);
 
-        ArrayList<MoviesModel.Result> results = new ArrayList<>();
-        if (moviesModel != null) {
-            results.addAll(moviesModel.getResults());
-        }
-
-        GridView gridView = view.findViewById(R.id.movie_list);
-        gridView.setAdapter(new MoviesAdapter(getContext(), results));
+        MainActivity mainActivity = new MainActivity();
+        mainActivity.resetPageNumber();
 
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -98,7 +105,11 @@ public class MovieFragment extends Fragment {
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (firstVisibleItem + visibleItemCount >= totalItemCount) {
                     // You've reached the end of the GridView, load more data here
-                    loadMoreData();
+                    Activity activity = getActivity();
+                    if (activity instanceof  OnLoadMoreListener){
+                        ((OnLoadMoreListener)activity).onLoadMore();
+                        updateGridViewWithNewData();
+                    }
                 }
             }
         });
@@ -107,10 +118,28 @@ public class MovieFragment extends Fragment {
         return view;
     }
 
+    private void loadMoviesFromPreferences() {
+        SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = preferences.getString("movies", "");
+        MoviesModel moviesModel = gson.fromJson(json, MoviesModel.class);
+        Log.v("json data", json);
+
+        if (moviesModel != null && moviesModel.getResults() != null) {
+            // Add new data to the existing list
+            results.addAll(moviesModel.getResults());
+            adapter.notifyDataSetChanged(); // Notify adapter of data change
+        }
+    }
+
+    // Method to update the GridView with new data
+    public void updateGridViewWithNewData() {
+        loadMoviesFromPreferences(); // Reload data from preferences
+    }
+
     void loadMoreData() {
         Toast.makeText(getActivity(), "Loading more movies",
                 Toast.LENGTH_LONG).show();
-        MainActivity mainActivity = new MainActivity();
     }
 
 }
