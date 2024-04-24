@@ -10,9 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.example.privateermovie.Adapters.MoviesAdapter;
+import com.example.privateermovie.MainActivity;
 import com.example.privateermovie.Models.MoviesModel;
 import com.example.privateermovie.R;
 import com.google.gson.Gson;
@@ -87,6 +90,27 @@ public class MovieFragment extends Fragment {
         GridView gridView = view.findViewById(R.id.movie_list);
         gridView.setAdapter(new MoviesAdapter(getContext(), results));
 
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {}
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (firstVisibleItem + visibleItemCount >= totalItemCount) {
+                    // You've reached the end of the GridView, load more data here
+                    loadMoreData();
+                }
+            }
+        });
+
+
         return view;
     }
+
+    void loadMoreData() {
+        Toast.makeText(getActivity(), "Loading more movies",
+                Toast.LENGTH_LONG).show();
+        MainActivity mainActivity = new MainActivity();
+    }
+
 }
