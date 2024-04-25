@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        fragmentChanger(MenuFragment.class);
+        fragmentChanger(MovieFragment.class);
 
         initGui();
     }

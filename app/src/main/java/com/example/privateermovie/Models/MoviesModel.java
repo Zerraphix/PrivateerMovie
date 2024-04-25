@@ -1,5 +1,6 @@
 package com.example.privateermovie.Models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MoviesModel {
@@ -8,7 +9,7 @@ public class MoviesModel {
     public int total_pages;
     public int total_results;
 
-    public static class Result{
+    public static class Result implements Serializable {
         public boolean adult;
         public String backdrop_path;
         public ArrayList<Integer> genre_ids;
