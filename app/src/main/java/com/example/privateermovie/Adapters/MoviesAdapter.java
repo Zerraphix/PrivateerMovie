@@ -83,7 +83,7 @@ public class MoviesAdapter extends ArrayAdapter<MoviesModel.Result> {
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("saved_movies", json);
             editor.apply();
-            Toast.makeText(mContext, "Movie liked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Movie added to watch later", Toast.LENGTH_SHORT).show();
         });
 
         return listItemView;
