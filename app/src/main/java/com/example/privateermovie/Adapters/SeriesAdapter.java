@@ -19,9 +19,16 @@ import com.example.privateermovie.Fragments.DetailedSerieFragment;
 import com.example.privateermovie.Models.SeriesModel;
 import com.example.privateermovie.R;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SeriesAdapter extends ArrayAdapter<SeriesModel.Result> {
     private Context mContext;
@@ -43,7 +50,7 @@ public class SeriesAdapter extends ArrayAdapter<SeriesModel.Result> {
             LayoutInflater inflater = LayoutInflater.from(getContext());
             viewHolder = new SeriesAdapter.ViewHolder();
 
-            listItemView = inflater.inflate(R.layout.movie_list_item, parent, false);
+            listItemView = inflater.inflate(R.layout.serie_list_item, parent, false);
 
             viewHolder.imageView = listItemView.findViewById(R.id.img_card);
             viewHolder.btn_thumb = listItemView.findViewById(R.id.btn_thumb); // Initialize btn_thumb here
@@ -75,14 +82,39 @@ public class SeriesAdapter extends ArrayAdapter<SeriesModel.Result> {
         });
 
         viewHolder.btn_thumb.setOnClickListener(v -> {
-            String json = new Gson().toJson(result);
+            // Retrieve existing saved series data
             SharedPreferences sharedPref = ((AppCompatActivity) mContext).getPreferences(Context.MODE_PRIVATE);
+            String existingJson = sharedPref.getString("saved_series", "[]"); // Default to an empty array if no data is found
+
+            // Convert existing JSON string to list of series objects
+            List<SeriesModel.Result> savedSeriesList = new ArrayList<>();
+            if (!existingJson.isEmpty()) {
+                try {
+                    JSONArray jsonArray = new JSONArray(existingJson);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        SeriesModel.Result series = new Gson().fromJson(jsonObject.toString(), SeriesModel.Result.class);
+                        savedSeriesList.add(series);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Add the new series to the list
+            savedSeriesList.add(result);
+
+            // Serialize the list to JSON format
+            String updatedJson = new Gson().toJson(savedSeriesList);
+
+            // Save the updated JSON string to SharedPreferences
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("saved_series", json);
+            editor.putString("saved_series", updatedJson);
             editor.apply();
+
+            // Show a toast message
             Toast.makeText(mContext, "Serie added to watch later", Toast.LENGTH_SHORT).show();
         });
-
         return listItemView;
     }
 

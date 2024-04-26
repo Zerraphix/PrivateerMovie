@@ -19,11 +19,17 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.privateermovie.Fragments.DetailedMovieFragment;
 import com.example.privateermovie.Models.MoviesModel;
+import com.example.privateermovie.Models.SeriesModel;
 import com.example.privateermovie.R;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class MoviesAdapter extends ArrayAdapter<MoviesModel.Result> {
 
@@ -78,11 +84,37 @@ public class MoviesAdapter extends ArrayAdapter<MoviesModel.Result> {
         });
 
         viewHolder.btn_thumb.setOnClickListener(v -> {
-            String json = new Gson().toJson(result);
+            // Retrieve existing saved series data
             SharedPreferences sharedPref = ((AppCompatActivity) mContext).getPreferences(Context.MODE_PRIVATE);
+            String existingJson = sharedPref.getString("saved_movies", "[]"); // Default to an empty array if no data is found
+
+            // Convert existing JSON string to list of series objects
+            List<MoviesModel.Result> savedMoviesList = new ArrayList<>();
+            if (!existingJson.isEmpty()) {
+                try {
+                    JSONArray jsonArray = new JSONArray(existingJson);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        MoviesModel.Result series = new Gson().fromJson(jsonObject.toString(), MoviesModel.Result.class);
+                        savedMoviesList.add(series);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Add the new series to the list
+            savedMoviesList.add(result);
+
+            // Serialize the list to JSON format
+            String updatedJson = new Gson().toJson(savedMoviesList);
+
+            // Save the updated JSON string to SharedPreferences
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("saved_movies", json);
+            editor.putString("saved_movies", updatedJson);
             editor.apply();
+
+            // Show a toast message
             Toast.makeText(mContext, "Movie added to watch later", Toast.LENGTH_SHORT).show();
         });
 

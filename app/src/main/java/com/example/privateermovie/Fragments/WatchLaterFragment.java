@@ -3,6 +3,7 @@ package com.example.privateermovie.Fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +62,26 @@ public class WatchLaterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_watch_later, container, false);
+        View view = inflater.inflate(R.layout.fragment_watch_later, container, false);
+        fragmentChanger(WatchMovieLaterFragment.class);
+
+        initGui(view);
+
+        return view;
+    }
+
+    void initGui(View view) {
+        view.findViewById(R.id.btn_movies_later).setOnClickListener(v -> fragmentChanger(WatchMovieLaterFragment.class));
+        view.findViewById(R.id.btn_series_later).setOnClickListener(v -> fragmentChanger(WatchSerieLaterFragment.class));
+    }
+
+
+    private void fragmentChanger(Class c) {
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.watchlater_fragment_container, c, null)
+                .setReorderingAllowed(true)
+                .addToBackStack("name")
+                .commit();
     }
 }
